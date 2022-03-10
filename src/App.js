@@ -12,7 +12,7 @@ export default function App() {
   const [loadingTransaction, setLoadingTransaction] = useState(false);
   const [completeTransaction, setCompleteTransaction] = useState(false);
 
-  const contractAddress = "0x4e2EB773284B1C3EB3E6804646e5ECfC25EE9084";
+  const contractAddress = "0x8D801C27eAA8fA6eac310892aa896F4e8068800D";
   const contractABI = abi.abi;
 
   const checkIfWalletIsConnected = async () => {
@@ -66,7 +66,12 @@ export default function App() {
     }
   };
 
-  const wave = async () => {
+  const wave = async (e) => {
+    e.preventDefault();
+    if (text === "") {
+      setError(" 🙊 add a message");
+      return false;
+    }
     try {
       const { ethereum } = window;
       if (ethereum) {
@@ -83,7 +88,7 @@ export default function App() {
         /*
          * Execute the actual wave from your smart contract
          */
-        const waveTxn = await wavePortalContract.wave();
+        const waveTxn = await wavePortalContract.wave(text);
         setLoadingTransaction(true);
         console.log("Mining...", waveTxn.hash);
 
@@ -101,9 +106,35 @@ export default function App() {
     }
   };
 
+  const getWave = async () => {
+    try {
+      const { ethereum } = window;
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const wavePortalContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+
+        let waves = await wavePortalContract.getAllWaves();
+        setWaves(waves);
+      }
+    } catch (error) {
+      console.log(error);
+      console.log("Ethereum object doesn't exist!");
+    }
+  };
+
   useEffect(() => {
     checkIfWalletIsConnected();
-  }, []);
+    getWave();
+  }, [completeTransaction]);
+
+  const [text, setText] = useState("");
+  const [error, setError] = useState("");
+  const [waves, setWaves] = useState([]);
 
   return (
     <div className="mainContainer">
@@ -121,11 +152,26 @@ export default function App() {
           <p>Connect your Ethereum wallet and wave at me!</p>
         </div>
 
-        <div className="wrapButtons">
-          <button className="waveButton" onClick={wave}>
+        <form className="form" onSubmit={wave}>
+          <textarea
+            placeholder="Some message"
+            onChange={(e) => {
+              setText(e.target.value);
+            }}
+            value={text}
+          />
+          <button type="submit" className="waveButton">
             {loadingTransaction ? "Loading " : "Send wave at me"}
           </button>
-
+          <p className="error">{error}</p>
+        </form>
+        <div>
+          <h2>Last messages</h2>
+          {waves.map((waves, key) => (
+            <p key={key}>{waves["message"]}</p>
+          ))}
+        </div>
+        <div className="wrapButtons">
           {/*
            * If there is no currentAccount render this button
            */}

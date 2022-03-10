@@ -6,7 +6,30 @@
   margin: auto;
   background: #d3d3d3;
 }
-
+.form {
+  display: flex;
+  width: 100%;
+  background: #d3d3d3;
+  padding: 10px;
+  border-radius: 10px;
+  flex-direction: column;
+}
+.form > textarea {
+  position: relative;
+  resize: none;
+  height: 100px;
+  border-radius: 10px;
+  padding: 10px;
+  border: none;
+  box-shadow: inset -3px -3px 7px rgba(255, 255, 255, 0.7),
+    inset 2px 2px 5px rgba(136, 165, 191, 0.38);
+}
+.error {
+  color: purple;
+}
+.form > textarea:focus {
+  outline: none;
+}
 .wrapStatus {
   border-radius: 10px;
   overflow: hidden;
